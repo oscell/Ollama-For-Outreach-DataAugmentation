@@ -16,8 +16,15 @@ conversation_history = []
 
 csv_data = pd.read_csv("/mnt/c/Users/OEM/Desktop/Ollama-For-Outreach/data/clean/12k_VERIFIED_CLEAN.csv")
 
-def select_column(records, gender):
-    return records[records["gender"] == gender]
+
+
+# Function to filter the dataframe based on the selected column
+def select_column(selected_column):
+    return csv_data[[selected_column]]
+
+def process_selection(selection):
+    # Process the selected options
+    return csv_data[selection]
 
 # Combined function for API call and slow echo
 def combined_function(message, history):
@@ -59,14 +66,29 @@ with gr.Blocks() as demo:
         chat_box = gr.ChatInterface(combined_function).queue()
         
     with gr.Row():
-            select_column,
-    [
-        gr.Dropdown(csv_data.columns.to_list(),label="Select the heading you want to edit"),
-        gr.Dataframe(csv_data,column_widths="100px"),
-        
-    ],
-        
+        gr.Dataframe(csv_data,column_widths="100px")
     
+    with gr.Row():
+        # Create a dropdown for column selection
+        dropdown = gr.Dropdown(
+            label="Select Columns", 
+            choices=csv_data.columns.to_list(), 
+            multiselect=True, 
+            type="value"
+        )
+        
+    with gr.Row():
+
+        # Create a Gradio interface
+        interface = gr.Interface(
+            fn=process_selection, 
+            inputs=dropdown, 
+            outputs="dataframe"  # Changed output type to 'dataframe'
+        )
+        
+        
+
+
 
 
 
