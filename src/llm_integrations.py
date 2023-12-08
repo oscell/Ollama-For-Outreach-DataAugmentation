@@ -23,8 +23,12 @@ def select_column(selected_column):
     return csv_data[[selected_column]]
 
 def process_selection(selection):
-    # Process the selected options
-    return csv_data[selection]
+    # Filter the DataFrame based on the selected columns
+    if selection:  # Check if any selection is made
+        return csv_data[selection]
+    else:
+        return csv_data  # Return the full DataFrame if no selection
+
 
 # Combined function for API call and slow echo
 def combined_function(message, history):
@@ -64,32 +68,32 @@ def combined_function(message, history):
 with gr.Blocks() as demo:
     with gr.Row():
         chat_box = gr.ChatInterface(combined_function).queue()
-        
-    with gr.Row():
-        gr.Dataframe(csv_data,column_widths="100px")
+    
     
     with gr.Row():
-        # Create a dropdown for column selection
         dropdown = gr.Dropdown(
             label="Select Columns", 
             choices=csv_data.columns.to_list(), 
             multiselect=True, 
-            type="value"
+            type="value",
         )
-        
     with gr.Row():
+        # Initialize an empty DataFrame component
+        dataframe_component = gr.Dataframe()
 
-        # Create a Gradio interface
-        interface = gr.Interface(
-            fn=process_selection, 
+        # Link the dropdown to update the DataFrame
+        dropdown.change(
+            fn=process_selection,  # Function to call on change
             inputs=dropdown, 
-            outputs="dataframe"  # Changed output type to 'dataframe'
+            outputs=dataframe_component  # Update the DataFrame component
         )
-        
-        
+
+    with gr.Row():
+        gr.Dataframe(csv_data)
 
 
-
+# Run the demo
+demo.launch()
 
 
 if __name__ == "__main__":
