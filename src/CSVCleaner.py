@@ -5,13 +5,14 @@ import json
 class CSVCleaner:
     def __init__(self, file_path):
         self.file_path = file_path
-        self.df = None
-        self.dict = None
-        self.filter = None
+        self.df = self.read_csv()
+        self.dict = self.read_dict('/mnt/c/Users/OEM/Desktop/Ollama-For-Outreach/dictionaries/french_english_dictionary.json')
+        self.filter = self.read_filter(r'/mnt/c/Users/OEM/Desktop/Ollama-For-Outreach/dictionaries/categorized_cities.json')
 
     def read_csv(self, encoding='utf-8'):
         """Read the CSV file."""
-        self.df = pd.read_csv(self.file_path, encoding=encoding)
+        df = pd.read_csv(self.file_path, encoding=encoding)
+        return df
 
     def write(self, file_path):
         """Write the CSV file."""
@@ -21,13 +22,16 @@ class CSVCleaner:
         """Return the dictionary."""
         with open(file_name, 'r', encoding='utf-8') as file:
             french_english_dict = json.load(file)
-            self.dict = french_english_dict
+            dictionary = french_english_dict
+        return dictionary
             
     def read_filter(self, file_name):
         """Gets the filter of all the cities and regions in Belgium, Switzerland, Luxembourg and Canada that do and don't speak French"""
         with open(file_name, 'r', encoding='utf-8') as file:
             french_filter = json.load(file)
-            self.filter = french_filter
+            filter = french_filter
+            
+        return filter
         
     def normalize_column_headings(self):
         """Removes spaces and converts to lowercase the column headings."""
@@ -82,6 +86,16 @@ class CSVCleaner:
     def get_dataframe(self):
         """Return the dataframe."""
         return self.df
+    
+    def clean(self):
+        self.normalize_column_headings()
+        
+        ## Translate the columns
+        self.translate_column('city')
+        self.translate_column('state')
+        self.translate_column('country')
+        self.translate_column('company_city')
+        return self
     
 
 
